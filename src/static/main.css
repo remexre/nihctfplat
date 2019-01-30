@@ -1,6 +1,15 @@
+@font-face {
+	font-family: Fura;
+	src: url(/Fura.woff2) format("woff2");
+}
+
 body, html {
 	background: black;
 	color: white;
+	font-family: Fura, monospace;
 }
 a { color: white; }
-pre { font-size: 1.25em; }
+pre {
+	font-family: Fura, monospace;
+	font-size: 1.25em;
+}
