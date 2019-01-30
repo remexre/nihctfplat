@@ -1,4 +1,5 @@
 .*
+!.dockerignore
 !.gitattributes
 !.gitignore
 !.travis.yml
