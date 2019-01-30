@@ -6,6 +6,7 @@
 
 use failure::{Error, SyncFailure};
 use log::warn;
+use serde::Serialize;
 use tera::Tera;
 use warp::{
     http::{header::CONTENT_TYPE, Response},
@@ -30,13 +31,15 @@ lazy_static::lazy_static! {
     };
 }
 
-/// Renders a template as HTML to a `warp::Reply`.
-pub fn render_html<T: serde::Serialize>(
-    name: &str,
-    data: &T,
-) -> Result<Response<String>, Rejection> {
-    TERA.render(name, data)
+/// Renders a template as HTML to a String.
+pub fn render<T: Serialize>(name: &str, data: T) -> Result<String, Error> {
+    TERA.render(name, &data)
         .map_err(|err| SyncFailure::new(err).into())
+}
+
+/// Renders a template as HTML to a `warp::Reply`.
+pub fn render_html<T: Serialize>(name: &str, data: T) -> Result<Response<String>, Rejection> {
+    render(name, data)
         .and_then(|body| {
             Response::builder()
                 .header(CONTENT_TYPE, "text/html; charset=utf-8")

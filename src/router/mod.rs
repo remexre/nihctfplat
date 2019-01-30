@@ -4,13 +4,15 @@
 //! > system has no knowledge of how the request is really being made. The router's responsibility
 //! > is to call into the domain logic, and then render that response data with an appropriate view.
 
+mod auth;
+
 use crate::{dal::DB, view::render_html};
 use futures::{
     future::{loop_fn, ok, Loop},
-    prelude::*,
+    Future,
 };
 use log::{info, warn};
-use maplit::hashmap;
+use serde_json::json;
 use std::net::SocketAddr;
 use warp::{filters::BoxedFilter, http::Response, Filter, Rejection};
 
@@ -35,11 +37,16 @@ pub fn serve_on<T, E>(addr: SocketAddr, db: DB) -> impl Future<Item = T, Error =
 }
 
 fn routes(db: DB) -> Resp!() {
-    route_any!(db => {
-        () => simple_page("index.html"),
-        ("sponsoring-ctf3") => simple_page("sponsoring-ctf3.html"),
-        ("humans.txt") => |_| warp::path::end().map(|| env!("CARGO_PKG_AUTHORS").replace(':', "\n"))
-    })
+    warp::any()
+        .map(move || warp::ext::set(db.clone()))
+        .untuple_one()
+        .and(auth::parse_auth_cookie())
+        .and(route_any! {
+            () => simple_page("index.html"),
+            ("humans.txt") => warp::path::end().map(|| env!("CARGO_PKG_AUTHORS").replace(':', "\n")),
+            ("sponsoring-ctf3") => simple_page("sponsoring-ctf3.html"),
+        })
+        .boxed()
 }
 
 fn statics() -> impl Clone + Filter<Extract = (&'static [u8],), Error = Rejection> {
@@ -52,10 +59,9 @@ fn statics() -> impl Clone + Filter<Extract = (&'static [u8],), Error = Rejectio
     })
 }
 
-fn simple_page(name: &'static str) -> impl Fn(DB) -> BoxedFilter<(Response<String>,)> {
-    move |_db| {
-        warp::path::end()
-            .and_then(move || render_html(name, &hashmap! { "foo" => "bar" }))
-            .boxed()
-    }
+fn simple_page(name: &'static str) -> BoxedFilter<(Response<String>,)> {
+    warp::path::end()
+        .and(auth::auth_opt())
+        .and_then(move |me| render_html(name, json!({ "me": me })))
+        .boxed()
 }

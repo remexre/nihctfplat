@@ -41,6 +41,9 @@
 )]
 
 #[macro_use]
+extern crate diesel;
+
+#[macro_use]
 pub mod util;
 
 pub mod dal;

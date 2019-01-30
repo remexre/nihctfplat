@@ -29,15 +29,14 @@ macro_rules! Resp {
     () => { warp::filters::BoxedFilter<(impl warp::Reply,)> };
 }
 
-/// Inserts `.or(...)` between the given filters, and `.boxed()` at the end.
+/// Inserts `.or(...)` between the given filters.
 macro_rules! route_any {
-    ($ctx:expr => { $h:path $(, $t:path)* $(,)* }) => {
-        $h($ctx.clone()) $(.or($t($ctx.clone())))*.boxed()
+    ($h:path $(, $t:path)* $(,)*) => {
+        $h $(.or($t))*
     };
-    ($ctx:expr => { $hp:tt => $h:expr $(, $tp:tt => $t:expr)* $(,)* }) => {
-        route_any!(@internal @path $hp).and($h($ctx.clone()))
-            $(.or(route_any!(@internal @path $tp).and($t($ctx.clone()))))*
-            .boxed()
+    ($hp:tt => $h:expr $(, $tp:tt => $t:expr)* $(,)*) => {
+        route_any!(@internal @path $hp).and($h)
+            $(.or(route_any!(@internal @path $tp).and($t)))*
     };
 
     (@internal @path ()) => {{ warp::any() }};
