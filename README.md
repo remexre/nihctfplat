@@ -1,6 +1,8 @@
 nihctfplat
 ==========
 
+[![Build Status](https://travis-ci.org/remexre/nihctfplat.svg?branch=master)](https://travis-ci.org/remexre/nihctfplat) [![Dependency Status](https://deps.rs/repo/github/remexre/nihctfplat/status.svg)](https://deps.rs/repo/github/remexre/nihctfplat)
+
 A CTF platform that was invented here.
 
 Hacking
@@ -13,8 +15,8 @@ License
 
 Licensed under either of
 
--	Apache License, Version 2.0, (http://www.apache.org/licenses/LICENSE-2.0\)
--	MIT license (http://opensource.org/licenses/MIT\)
+-	Apache License, Version 2.0, in LICENSE-APACHE
+-	MIT License, in LICENSE-MIT
 
 at your option.
 
