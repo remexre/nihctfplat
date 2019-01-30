@@ -1,0 +1,19 @@
+[package]
+authors = ["Nathan Ringo <remexre@gmail.com>"]
+description = "A CTF platform that was invented here."
+edition = "2018"
+license = "Apache-2.0/MIT"
+name = "nihctfplat"
+version = "0.1.0"
+
+[dependencies]
+chrono = "0.4.6"
+diesel = "1.4.1"
+# embed = { git = "https://github.com/iptq/embed.git" }
+failure = "0.1.5"
+futures = "0.1.25"
+jsonwebtoken = "5.0.1"
+log = "0.4.6"
+structopt = "0.2.14"
+tokio = "0.1.15"
+warp = "0.1.12"
