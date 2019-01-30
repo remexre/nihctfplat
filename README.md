@@ -1,7 +1,7 @@
 nihctfplat
 ==========
 
-[![Build Status](https://travis-ci.org/remexre/nihctfplat.svg?branch=master)](https://travis-ci.org/remexre/nihctfplat) [![Dependency Status](https://deps.rs/repo/github/remexre/nihctfplat/status.svg)](https://deps.rs/repo/github/remexre/nihctfplat)
+[![Build Status](https://travis-ci.org/remexre/nihctfplat.svg?branch=master)](https://travis-ci.org/remexre/nihctfplat) [![Dependency Status](https://deps.rs/repo/github/remexre/nihctfplat/status.svg)](https://deps.rs/repo/github/remexre/nihctfplat) [![Docker Status](https://img.shields.io/docker/build/remexre/nihctfplat.svg?style=flat)](https://hub.docker.com/r/remexre/nihctfplat)
 
 A CTF platform that was invented here.
 
