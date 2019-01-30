@@ -3,6 +3,11 @@ nihctfplat
 
 A CTF platform that was invented here.
 
+Hacking
+-------
+
+This follows the approach laid out in ["Stateless MVC"](https://www.tedinski.com/2018/09/11/stateless-mvc.html). Ignore the "Should you use this design?" section...
+
 License
 -------
 

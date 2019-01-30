@@ -1,5 +1,5 @@
 [package]
-authors = ["Nathan Ringo <remexre@gmail.com>"]
+authors = ["Nathan Ringo <remexre@protonmail.com>"]
 description = "A CTF platform that was invented here."
 edition = "2018"
 license = "Apache-2.0/MIT"
@@ -8,12 +8,26 @@ version = "0.1.0"
 
 [dependencies]
 chrono = "0.4.6"
-diesel = "1.4.1"
-# embed = { git = "https://github.com/iptq/embed.git" }
+diesel = { version = "1.4.1", default_features = false, features = ["chrono", "postgres", "r2d2"] }
+dotenv = "0.13.0"
 failure = "0.1.5"
+fern = { version = "0.5.7", features = ["syslog-4"] }
 futures = "0.1.25"
 jsonwebtoken = "5.0.1"
+lazy_static = "1.2.0"
 log = "0.4.6"
+packer = "0.2.0"
 structopt = "0.2.14"
+syslog = "4.0.1"
+tera = "0.11.20"
 tokio = "0.1.15"
 warp = "0.1.12"
+hostname = "0.1.5"
+tokio-threadpool = "0.1.11"
+serde = "1.0.85"
+serde_derive = "1.0.85"
+maplit = "1.0.1"
+
+[patch.crates-io]
+packer = { git = "https://github.com/remexre/packer" }
+warp = { git = "https://github.com/remexre/warp", branch = "vec-u8-replysealed" }

@@ -1,8 +1,8 @@
-all: check build-debug test
+all: check build-debug doc test
 clean:
 	cargo clean
 watch TARGET="all":
-	watchexec -cre rs,toml "just {{TARGET}}"
+	watchexec -cre css,html,rs,toml "just {{TARGET}}"
 
 build: build-debug build-release
 build-debug:
@@ -17,13 +17,14 @@ doc:
 	cargo doc --all
 test:
 	RUST_BACKTRACE=full cargo test --all -- --nocapture
+	RUST_BACKTRACE=full cargo test --all --release -- --nocapture
 
 outdated-deps:
 	cargo outdated -R
 run +ARGS="":
 	cargo run -- {{ARGS}}
 update-schema:
-	diesel print-schema > src/db/schema.rs
+	diesel print-schema > src/dal/schema.rs
 update-schema-destructive: local-nuke-db update-schema
 
 local-nuke-db:
