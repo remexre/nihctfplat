@@ -4,9 +4,12 @@
 //! > system has no knowledge of how the request is really being made. The router's responsibility
 //! > is to call into the domain logic, and then render that response data with an appropriate view.
 
-mod auth;
-mod team;
+#[macro_use]
 mod util;
+
+mod auth;
+mod errors;
+mod team;
 
 use crate::{
     dal::{Mailer, DB},
@@ -36,6 +39,8 @@ pub fn serve_on<T, E>(
         let server = set(db.clone())
             .and(set(mailer.clone()))
             .and(statics().or(routes()))
+            .recover(errors::internal)
+            .recover(errors::last_chance)
             .with(warp::log("nihctfplat::router"));
         warp::serve(server).bind(addr).then(|r| {
             let status = match r {

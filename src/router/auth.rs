@@ -124,7 +124,7 @@ pub fn login_from_mail_post() -> Resp!() {
                 .header(LOCATION, "/")
                 .header(SET_COOKIE, set_cookie)
                 .status(StatusCode::FOUND)
-                .body("")
+                .body(String::new())
                 .map_err(Error::from);
             result(r).err_to_rejection()
         })
@@ -138,7 +138,7 @@ pub fn logout() -> Resp!() {
                 .header(LOCATION, "/")
                 .header(SET_COOKIE, "auth=; Max-Age=0; Path=/")
                 .status(StatusCode::FOUND)
-                .body("")
+                .body(String::new())
                 .map_err(Error::from);
             result(r).err_to_rejection()
         })

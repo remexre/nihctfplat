@@ -38,22 +38,10 @@ pub fn log_err(err: &failure::Error) {
     }
 }
 
-/// The type of a responder. Since `impl Trait` can't be used in `type` items, this magics one up.
-macro_rules! Resp {
-    () => { warp::filters::BoxedFilter<(impl warp::Reply,)> };
-}
-
-/// Inserts `.or(...)` between the given filters.
-macro_rules! route_any {
-    ($hm:ident $hp:tt => $h:expr $(, $tm:ident $tp:tt => $t:expr)* $(,)*) => {
-        route_any!(@internal @path $hm $hp).and($h)
-            $(.or(route_any!(@internal @path $tm $tp).and($t)))*
-    };
-
-    (@internal @path GET ()) => {{ warp::get2() }};
-    (@internal @path POST ()) => {{ warp::post2() }};
-    (@internal @path $m:ident $p:tt) => {{
-        use warp::path;
-        route_any!(@internal @path $m ()).and(path! $p)
+/// An explicit trivial cast.
+macro_rules! coerce {
+    ($e:expr => $t:ty) => {{
+        let x: $t = $e;
+        x
     }};
 }
