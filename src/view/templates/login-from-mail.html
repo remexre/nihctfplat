@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block title %}Log In{% endblock title %}
+
+{% block main_classes %}center vcenter{% endblock main_classes %}
+
+{% block content %}
+<div class="box">
+	{{ macros::post_link(href="/login/" ~ login, text="Log In") }}
+</div>
+{% endblock content %}

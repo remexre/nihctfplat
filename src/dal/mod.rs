@@ -10,13 +10,13 @@ mod schema;
 
 pub use crate::dal::mailer::Mailer;
 use crate::{
-    dal::schema::{auths, users},
+    dal::schema::{auths, logins, users},
     schema::User,
     util::blocking,
 };
-use chrono::{Duration, Utc};
+use chrono::{DateTime, Utc};
 use diesel::{
-    dsl::{insert_into, now},
+    dsl::{insert_into, now, update},
     prelude::*,
     r2d2::{ConnectionManager, Pool, PoolError},
 };
@@ -42,32 +42,66 @@ impl DB {
         Ok(DB { pool })
     }
 
-    /// Creates an authentication record for the given user, returning it.
-    pub fn create_auth(
-        &self,
-        user: i32,
-        expires: Option<Duration>,
-    ) -> impl Future<Item = Uuid, Error = Error> {
+    /// Turns a login link into an authentication token, invalidating the login link.
+    pub fn consume_login_link(&self, login: Uuid) -> impl Future<Item = Uuid, Error = Error> {
         self.async_query(move |conn| {
             let token = Uuid::new_v4();
-            let expires = expires.map(|d| Utc::now() + d);
-            insert_into(auths::table)
+            update(
+                logins::table
+                    .filter(logins::expires.gt(now))
+                    .filter(logins::used.eq(false))
+                    .find(login),
+            )
+            .set(logins::used.eq(true))
+            .returning(logins::userid)
+            .get_result(conn)
+            .and_then(|user: i32| {
+                insert_into(auths::table)
+                    .values((auths::id.eq(token), auths::userid.eq(user)))
+                    .execute(conn)
+            })
+            .map(|_| token)
+        })
+    }
+
+    /// Creates a login link for the given user, returning the relevant UUID.
+    pub fn create_login_link(
+        &self,
+        user: i32,
+        expires: DateTime<Utc>,
+    ) -> impl Future<Item = Uuid, Error = Error> {
+        self.async_query(move |conn| {
+            let login = Uuid::new_v4();
+            insert_into(logins::table)
                 .values((
-                    auths::id.eq(token),
-                    auths::userid.eq(user),
-                    auths::expires.eq(expires),
+                    logins::id.eq(login),
+                    logins::userid.eq(user),
+                    logins::expires.eq(expires),
                 ))
                 .execute(conn)
-                .map(|_| token)
+                .map(|_| login)
+        })
+    }
+
+    /// Creates a user, returning their ID.
+    pub fn create_user(
+        &self,
+        username: String,
+        email: String,
+    ) -> impl Future<Item = i32, Error = Error> {
+        self.async_query(move |conn| {
+            insert_into(users::table)
+                .values((users::name.eq(&username), users::email.eq(&email)))
+                .returning(users::id)
+                .get_result(conn)
         })
     }
 
     /// Looks up an authentication record, returning the ID of the user it corresponds to.
-    pub fn get_auth_user(&self, uuid: Uuid) -> impl Future<Item = i32, Error = Error> {
+    pub fn get_auth_user(&self, auth: Uuid) -> impl Future<Item = i32, Error = Error> {
         self.async_query(move |conn| {
             auths::table
-                .filter(auths::expires.lt(now))
-                .find(uuid)
+                .find(auth)
                 .select(auths::userid)
                 .get_result(conn)
         })

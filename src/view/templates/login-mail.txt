@@ -1,0 +1,7 @@
+{% if register %}Thanks for registering!{% endif %}
+
+You can log in to ACM CTF 2 by visiting the following URL:
+
+https://ctf.acm.umn.edu/login/{{ token }}
+
+This link will expire {{ duration }} (at {{ expires }}).

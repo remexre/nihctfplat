@@ -19,7 +19,7 @@ use futures::{
 use log::{info, warn};
 use serde_json::json;
 use std::net::SocketAddr;
-use warp::{filters::BoxedFilter, http::Response, Filter, Rejection};
+use warp::{path, Filter, Rejection};
 
 /// Starts an HTTP server at the given address. The polymorphism in the return type indicates that
 /// the future will never resolve, since it can be trivially used as
@@ -31,8 +31,9 @@ pub fn serve_on<T, E>(
 ) -> impl Future<Item = T, Error = E> {
     loop_fn((), move |()| {
         info!("Starting to serve...");
-        let server = statics()
-            .or(set(db.clone()).and(set(mailer.clone())).and(routes()))
+        let server = set(db.clone())
+            .and(set(mailer.clone()))
+            .and(statics().or(routes()))
             .with(warp::log("nihctfplat::router"));
         warp::serve(server).bind(addr).then(|r| {
             let status = match r {
@@ -53,7 +54,12 @@ fn routes() -> Resp!() {
                 warp::path::end().map(|| env!("CARGO_PKG_AUTHORS").replace(':', "\n"))
             },
             GET("login") => simple_page("login.html"),
+            GET("login") => auth::login_from_mail_get(),
+            POST("login") => auth::login(),
+            POST("login") => auth::login_from_mail_post(),
+            POST("logout") => auth::logout(),
             GET("register") => simple_page("register.html"),
+            POST("register") => auth::register(),
             GET("sponsoring-ctf3") => simple_page("sponsoring-ctf3.html"),
         })
         .boxed()
@@ -69,7 +75,7 @@ fn statics() -> impl Clone + Filter<Extract = (&'static [u8],), Error = Rejectio
     })
 }
 
-fn simple_page(name: &'static str) -> BoxedFilter<(Response<String>,)> {
+fn simple_page(name: &'static str) -> Resp!() {
     warp::path::end()
         .and(auth::auth_opt())
         .and_then(move |me| render_html(name, json!({ "me": me })))

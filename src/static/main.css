@@ -17,18 +17,17 @@ nav {
 	border-bottom: 1px solid #ffffff;
 	box-sizing: border-box;
 	display: flex;
+	flex-wrap: wrap;
 	justify-content: space-between;
 	min-width: 100vw;
 	padding: 0 2em;
 	position: fixed;
 }
-nav > ul {
+nav > a, nav > form {
 	display: inline-block;
-	padding-left: 0;
+	padding: 0.75em 1em;
 }
-nav > ul > li { display: inline-block; }
-nav > ul.nav-left > li { padding-right: 1em; }
-nav > ul.nav-right > li { padding-left: 1em; }
+nav > span.spacer { flex-grow: 1; }
 main {
 	box-sizing: border-box;
 	min-height: 100vh;
@@ -53,12 +52,14 @@ input[type="email"], input[type="text"] {
 	color: white;
 	margin-right: 4px;
 }
-pre {
-	font-family: Fura, monospace;
-	font-size: 1.25em;
+input[type="email"].bad, input[type="text"].bad {
+	border-bottom-color: #ff0000;
+	color: #ff0000;
 }
+p { white-space: pre-wrap; }
+pre { font-family: Fura, monospace; }
 
-form.login-form {
+.box {
 	border: 1px solid #ffffff;
 	justify-content: space-around;
 	padding: 1em;

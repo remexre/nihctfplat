@@ -5,7 +5,7 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8"/>
-		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css"/>
 		<link rel="stylesheet" href="/main.css"/>
 		{% block wholetitle %}
 			<title>{% block title %}{% endblock title %} - ACM CTF 2</title>
@@ -17,20 +17,23 @@
 	</head>
 	<body>
 		<nav>
-			<ul class="nav-left">
-				<li><a class="bold nounderline" href="/">ACM CTF 2</a></li>
-				<li><a href="/sponsoring-ctf3">Sponsoring CTF 3</a></li>
-				<li><a href="mailto:remexre@protonmail.com">Contact a Mod</a></li>
-			</ul>
-			<ul class="nav-right">
+			<a class="bold nounderline" href="/">ACM CTF 2</a>
+			<a href="/sponsoring-ctf3">Sponsoring CTF 3</a>
+			<a href="mailto:remexre@protonmail.com">Contact a Mod</a>
+			<span class="spacer"></span>
 {% if me %}
-				<li>Hi, {{ me.name }}!</li>
-				<li>{{ macros::post_link(href="/logout", text="Log Out") }}</li>
+{% if me.team %}
+			<a href="/problems">Problems</a>
+			<a href="/team">My Team</a>
 {% else %}
-				<li><a href="/login">Log In</a></li>
-				<li><a href="/register">Register</a></li>
+			<a href="/team/create">Create a Team</a>
+			<a href="/team/join">Join a Team</a>
 {% endif %}
-			</ul>
+			{{ macros::post_link(href="/logout", text="Log Out") }}
+{% else %}
+			<a href="/login">Log In</a>
+			<a href="/register">Register</a>
+{% endif %}
 		</nav>
 		<main class="{% block main_classes %}center{% endblock main_classes %}">
 			{% block content %}{% endblock content %}

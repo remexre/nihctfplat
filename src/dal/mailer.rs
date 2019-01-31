@@ -12,7 +12,7 @@ use lettre::{
 use lettre_email::EmailBuilder;
 use std::sync::Arc;
 
-/// A connections to the mailer.
+/// A connection to the mailer.
 #[allow(missing_debug_implementations)]
 #[derive(Clone)]
 pub struct Mailer {
@@ -38,14 +38,12 @@ impl Mailer {
         &self,
         to: &str,
         subject: &str,
-        html: &str,
         text: &str,
     ) -> impl Future<Item = (), Error = Error> {
         let r = EmailBuilder::new()
             .to(to)
             .from(self.inner.from.as_str())
             .subject(subject)
-            .html(html)
             .text(text)
             .build();
         let email = match r {
