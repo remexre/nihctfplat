@@ -3,13 +3,67 @@
 	src: url(/Fura.woff2) format("woff2");
 }
 
-body, html {
-	background: black;
-	color: white;
+html {
+	background: #000000;
+	color: #ffffff;
 	font-family: Fura, monospace;
 }
-a { color: white; }
+body {
+	/*! display: grid; */
+}
+
+nav {
+	background-color: #000000;
+	border-bottom: 1px solid #ffffff;
+	box-sizing: border-box;
+	display: flex;
+	justify-content: space-between;
+	min-width: 100vw;
+	padding: 0 2em;
+	position: fixed;
+}
+nav > ul {
+	display: inline-block;
+	padding-left: 0;
+}
+nav > ul > li { display: inline-block; }
+nav > ul.nav-left > li { padding-right: 1em; }
+nav > ul.nav-right > li { padding-left: 1em; }
+main {
+	box-sizing: border-box;
+	min-height: 100vh;
+	padding-top: 4em;
+}
+main.center { align-items: center; display: flex; flex-direction: column; }
+main.vcenter { justify-content: center; }
+
+a { color: #ffffff; }
+a.nounderline { text-decoration: none; }
+button, input[type="button"], input[type="submit"] {
+	background: none;
+	border: none;
+	color: #ffffff;
+	cursor: pointer;
+	text-decoration: underline;
+}
+input[type="email"], input[type="text"] {
+	background-color: black;
+	border: none;
+	border-bottom: 1px solid white;
+	color: white;
+	margin-right: 4px;
+}
 pre {
 	font-family: Fura, monospace;
 	font-size: 1.25em;
+}
+
+form.login-form {
+	border: 1px solid #ffffff;
+	justify-content: space-around;
+	padding: 1em;
+}
+.vertical {
+	display: flex;
+	flex-direction: column;
 }

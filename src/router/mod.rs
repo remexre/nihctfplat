@@ -42,9 +42,13 @@ fn routes(db: DB) -> Resp!() {
         .untuple_one()
         .and(auth::parse_auth_cookie())
         .and(route_any! {
-            () => simple_page("index.html"),
-            ("humans.txt") => warp::path::end().map(|| env!("CARGO_PKG_AUTHORS").replace(':', "\n")),
-            ("sponsoring-ctf3") => simple_page("sponsoring-ctf3.html"),
+            GET() => simple_page("index.html"),
+            GET("humans.txt") => {
+                warp::path::end().map(|| env!("CARGO_PKG_AUTHORS").replace(':', "\n"))
+            },
+            GET("login") => simple_page("login.html"),
+            GET("register") => simple_page("register.html"),
+            GET("sponsoring-ctf3") => simple_page("sponsoring-ctf3.html"),
         })
         .boxed()
 }

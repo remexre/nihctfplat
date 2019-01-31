@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}Log In{% endblock title %}
+
+{% block main_classes %}center vcenter{% endblock main_classes %}
+
+{% block content %}
+<form class="login-form vertical" method="post" style="min-height: 5em;">
+	<input name="username" placeholder="Username" type="text"></input>
+	<input type="submit" value="Log In"></input>
+</form>
+{% endblock content %}

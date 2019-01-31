@@ -1,3 +1,5 @@
+{% import "macros.html" as macros %}
+
 <!DOCTYPE html>
 
 <html lang="en">
@@ -11,18 +13,25 @@
 		{% block head %}
 		{% endblock head %}
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/turbolinks/5.2.0/turbolinks.js"></script>
+		<script>Turbolinks.start()</script>
 	</head>
 	<body>
 		<nav>
-			<ul>
+			<ul class="nav-left">
+				<li><a class="nounderline" href="/">ACM CTF 2</a></li>
+			</ul>
+			<ul class="nav-right">
 {% if me %}
-				<li>Hi, {{ me.name }}</li>
+				<li>Hi, {{ me.name }}!</li>
+				<li>{{ macros::post_link(href="/logout", text="Log Out") }}</li>
 {% else %}
-				<li><a>Log In</a></li>
-				<li><a>Register</a></li>
+				<li><a href="/login">Log In</a></li>
+				<li><a href="/register">Register</a></li>
 {% endif %}
 			</ul>
 		</nav>
-		<main>{% block content %}{% endblock content %}</main>
+		<main class="{% block main_classes %}center{% endblock main_classes %}">
+			{% block content %}{% endblock content %}
+		</main>
 	</body>
 </html>
