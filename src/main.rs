@@ -1,6 +1,10 @@
 use failure::{bail, Fallible};
 use log::warn;
-use nihctfplat::{dal::DB, router::serve_on, util::log_err};
+use nihctfplat::{
+    dal::{Mailer, DB},
+    router::serve_on,
+    util::log_err,
+};
 use std::{
     net::{SocketAddr, ToSocketAddrs},
     process::exit,
@@ -26,7 +30,18 @@ fn run(options: Options) -> Fallible<()> {
     let serve_addr = options.serve_addr()?;
     let mut runtime = Builder::new().build()?;
     let db = DB::connect(&options.database_url)?;
-    runtime.block_on(serve_on(serve_addr, db))
+    let smtp_from = options
+        .smtp_from
+        .as_ref()
+        .unwrap_or(&options.smtp_user)
+        .clone();
+    let mailer = Mailer::connect(
+        &options.smtp_host,
+        options.smtp_user,
+        options.smtp_pass,
+        smtp_from,
+    )?;
+    runtime.block_on(serve_on(serve_addr, db, mailer))
 }
 
 #[derive(Debug, StructOpt)]
@@ -53,6 +68,23 @@ pub struct Options {
     /// The port to serve on.
     #[structopt(short = "P", long = "port", env = "PORT", default_value = "8080")]
     port: u16,
+
+    /// The SMTP server's hostname.
+    #[structopt(long = "smtp-host", env = "SMTP_HOST")]
+    smtp_host: String,
+
+    /// The user to authenticate to the SMTP server with. Usually your email address.
+    #[structopt(long = "smtp-user", env = "SMTP_USER")]
+    smtp_user: String,
+
+    /// The password to authenticate to the SMTP server with.
+    #[structopt(long = "smtp-pass", env = "SMTP_PASS")]
+    smtp_pass: String,
+
+    /// The From address for emails. Maybe be of the form "email@host.com" or
+    /// "Foo Bar <email@host.com>". Defaults to the SMTP user.
+    #[structopt(long = "smtp-from", env = "SMTP_FROM")]
+    smtp_from: Option<String>,
 
     /// The syslog server to send logs to.
     #[structopt(short = "s", long = "syslog-server", env = "SYSLOG_SERVER")]

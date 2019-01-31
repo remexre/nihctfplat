@@ -1,6 +1,20 @@
 //! Various utilities.
 
+use futures::{future::poll_fn, Future};
 use log::error;
+
+/// A higher-level version of `tokio_threadpool::blocking`.
+pub fn blocking<E, F, T>(func: F) -> impl Future<Item = T, Error = E>
+where
+    F: FnOnce() -> Result<T, E>,
+{
+    let mut func = Some(func);
+    poll_fn(move || {
+        tokio_threadpool::blocking(|| (func.take().unwrap())())
+            .map_err(|_| panic!("Blocking operations must be run inside a Tokio thread pool!"))
+    })
+    .and_then(|r| r)
+}
 
 /// Logs an error, including its causes and backtrace (if possible).
 pub fn log_err(err: &failure::Error) {

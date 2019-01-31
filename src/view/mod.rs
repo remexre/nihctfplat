@@ -4,7 +4,7 @@
 //! > response. I'm happy to call this "view" in common with traditional stateless MVC, because
 //! > it's role is largely the same.
 
-use failure::{Error, SyncFailure};
+use failure::{Error, Fallible, SyncFailure};
 use log::warn;
 use serde::Serialize;
 use tera::Tera;
@@ -31,7 +31,7 @@ lazy_static::lazy_static! {
 }
 
 /// Renders a template as HTML to a String.
-pub fn render<T: Serialize>(name: &str, data: T) -> Result<String, Error> {
+pub fn render<T: Serialize>(name: &str, data: T) -> Fallible<String> {
     TERA.render(name, &data)
         .map_err(|err| SyncFailure::new(err).into())
 }

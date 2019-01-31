@@ -67,3 +67,5 @@ form.login-form {
 	display: flex;
 	flex-direction: column;
 }
+
+.bold { font-weight: bold; }

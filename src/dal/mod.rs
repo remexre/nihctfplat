@@ -4,12 +4,15 @@
 //! > want to use "model"), is the only module that does any talking to the database, or any other
 //! > IO or interaction with other kinds of externalized state for that matter.
 
+mod mailer;
 #[allow(proc_macro_derive_resolution_fallback, unused_import_braces)]
 mod schema;
 
+pub use crate::dal::mailer::Mailer;
 use crate::{
     dal::schema::{auths, users},
     schema::User,
+    util::blocking,
 };
 use chrono::{Duration, Utc};
 use diesel::{
@@ -19,11 +22,10 @@ use diesel::{
 };
 use failure::Error;
 use futures::{
-    future::{err, poll_fn, Either},
+    future::{err, Either},
     Future,
 };
 use std::sync::Arc;
-use tokio_threadpool::blocking;
 use uuid::Uuid;
 
 /// A pool of connections to the database.
@@ -89,7 +91,7 @@ impl DB {
     }
 
     /// Performs a query "asynchronously" (but not really). Diesel currently does not support
-    /// async/futures, so we use `tokio_threadpool::blocking` so the database operations don't block
+    /// async/futures, so we use `crate::util::blocking` so the database operations don't block
     /// the thread. This does, however, require the future to be run inside a threadpool.  
     ///
     /// NOTE(nathan): This isn't really Diesel's fault; libpq exposes a synchronous interface.
@@ -106,14 +108,7 @@ impl DB {
         F: FnMut(&PgConnection) -> Result<T, E>,
     {
         match self.pool.get() {
-            Ok(conn) => Either::A(
-                poll_fn(move || {
-                    blocking(|| func(&*conn).map_err(|e| e.into())).map_err(|_| {
-                        panic!("Database queries must be run inside a Tokio thread pool!")
-                    })
-                })
-                .and_then(|r| r),
-            ),
+            Ok(conn) => Either::A(blocking(move || func(&*conn).map_err(|e| e.into()))),
             Err(e) => Either::B(err(e.into())),
         }
     }
