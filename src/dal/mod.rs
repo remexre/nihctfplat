@@ -8,6 +8,8 @@ mod mailer;
 #[allow(proc_macro_derive_resolution_fallback, unused_import_braces)]
 mod schema;
 
+embed_migrations!("migrations");
+
 pub use crate::dal::mailer::Mailer;
 use crate::{
     dal::schema::{auths, logins, teams, users},
@@ -18,7 +20,7 @@ use chrono::{DateTime, Utc};
 use diesel::{
     dsl::{insert_into, now, update},
     prelude::*,
-    r2d2::{ConnectionManager, Pool, PoolError},
+    r2d2::{ConnectionManager, Pool},
 };
 use failure::{bail, Error};
 use futures::{
@@ -37,8 +39,9 @@ pub struct DB {
 
 impl DB {
     /// Connects to the database with at the given URL.
-    pub fn connect(database_url: &str) -> Result<DB, PoolError> {
+    pub fn connect(database_url: &str) -> Result<DB, Error> {
         let pool = Arc::new(Pool::new(ConnectionManager::new(database_url))?);
+        embedded_migrations::run(&pool.get()?)?;
         Ok(DB { pool })
     }
 

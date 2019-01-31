@@ -6,10 +6,15 @@ use futures::{
     Future,
 };
 use lettre::{
-    smtp::{authentication::Credentials, SmtpTransport},
+    smtp::{
+        authentication::Credentials,
+        client::net::{ClientTlsParameters, DEFAULT_TLS_PROTOCOLS},
+        ClientSecurity, SmtpTransport,
+    },
     EmailTransport,
 };
 use lettre_email::EmailBuilder;
+use native_tls::TlsConnector;
 use std::sync::Arc;
 
 /// A connection to the mailer.
@@ -21,8 +26,25 @@ pub struct Mailer {
 
 impl Mailer {
     /// Connects to an SMTP server.
-    pub fn connect(host: &str, user: String, pass: String, from: String) -> Fallible<Mailer> {
-        let smtp = SmtpTransport::simple_builder(host)?
+    pub fn connect(
+        host: &str,
+        secure: bool,
+        user: String,
+        pass: String,
+        from: String,
+    ) -> Fallible<Mailer> {
+        let smtp = if secure {
+            SmtpTransport::simple_builder(host)?
+        } else {
+            let mut tls_builder = TlsConnector::builder()?;
+            let _ = tls_builder.supported_protocols(DEFAULT_TLS_PROTOCOLS)?;
+
+            let tls_parameters =
+                ClientTlsParameters::new(host.to_string(), tls_builder.build().unwrap());
+
+            SmtpTransport::builder(host, ClientSecurity::Opportunistic(tls_parameters))?
+        };
+        let smtp = smtp
             .credentials(Credentials::new(user.clone(), pass))
             .build();
         Ok(Mailer {

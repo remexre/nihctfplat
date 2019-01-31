@@ -9,7 +9,9 @@ version = "0.1.0"
 [dependencies]
 antidote = "1.0.0"
 chrono = { version = "0.4.6", features = ["serde"] }
+chrono-humanize = "0.0.11"
 diesel = { version = "1.4.1", default_features = false, features = ["chrono", "postgres", "r2d2", "uuid"] }
+diesel_migrations = "1.4.0"
 dotenv = "0.13.0"
 failure = "0.1.5"
 fern = { version = "0.5.7", features = ["syslog-4"] }
@@ -20,6 +22,7 @@ lazy_static = "1.2.0"
 lettre = "0.8.3"
 lettre_email = "0.8.3"
 log = "0.4.6"
+native-tls = "0.1.5"
 packer = "0.3.1"
 serde = "1.0.85"
 serde_derive = "1.0.85"
@@ -31,7 +34,6 @@ tokio = "0.1.15"
 tokio-threadpool = "0.1.11"
 uuid = { version = "0.6.5", features = ["serde", "v4"] }
 warp = "0.1.12"
-chrono-humanize = "0.0.11"
 
 [patch.crates-io]
 warp = { git = "https://github.com/remexre/warp", branch = "vec-u8-replysealed" }

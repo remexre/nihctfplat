@@ -37,6 +37,7 @@ fn run(options: Options) -> Fallible<()> {
         .clone();
     let mailer = Mailer::connect(
         &options.smtp_host,
+        !options.smtp_insecure,
         options.smtp_user,
         options.smtp_pass,
         smtp_from,
@@ -71,20 +72,24 @@ pub struct Options {
 
     /// The SMTP server's hostname.
     #[structopt(long = "smtp-host", env = "SMTP_HOST")]
-    smtp_host: String,
+    pub smtp_host: String,
+
+    /// Whether to make SMTP less secure.
+    #[structopt(long = "smtp-insecure")]
+    pub smtp_insecure: bool,
 
     /// The user to authenticate to the SMTP server with. Usually your email address.
     #[structopt(long = "smtp-user", env = "SMTP_USER")]
-    smtp_user: String,
+    pub smtp_user: String,
 
     /// The password to authenticate to the SMTP server with.
     #[structopt(long = "smtp-pass", env = "SMTP_PASS")]
-    smtp_pass: String,
+    pub smtp_pass: String,
 
     /// The From address for emails. Maybe be of the form "email@host.com" or
     /// "Foo Bar <email@host.com>". Defaults to the SMTP user.
     #[structopt(long = "smtp-from", env = "SMTP_FROM")]
-    smtp_from: Option<String>,
+    pub smtp_from: Option<String>,
 
     /// The syslog server to send logs to.
     #[structopt(short = "s", long = "syslog-server", env = "SYSLOG_SERVER")]
