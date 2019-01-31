@@ -21,11 +21,10 @@ lazy_static::lazy_static! {
         struct Templates;
 
         let mut tera = Tera::default();
-        for file in Templates::list() {
-            let contents = Templates::get(file).unwrap();
-            let contents = std::str::from_utf8(contents).unwrap();
-            tera.add_raw_template(file, contents).unwrap();
-        }
+        let templates = Templates::list()
+            .map(|name| (name, Templates::get_str(name).unwrap()))
+            .collect::<Vec<_>>();
+        tera.add_raw_templates(templates).unwrap();
         tera.build_inheritance_chains().unwrap();
         tera
     };
