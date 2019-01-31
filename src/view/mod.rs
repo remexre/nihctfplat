@@ -6,6 +6,7 @@
 
 use failure::{Error, Fallible, SyncFailure};
 use log::warn;
+use packer::Packer;
 use serde::Serialize;
 use tera::Tera;
 use warp::{
@@ -16,7 +17,7 @@ use warp::{
 
 lazy_static::lazy_static! {
     static ref TERA: Tera = {
-        #[derive(packer::Packer)]
+        #[derive(Packer)]
         #[folder = "src/view/templates"]
         struct Templates;
 

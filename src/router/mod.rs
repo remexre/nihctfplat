@@ -17,6 +17,7 @@ use futures::{
     Future,
 };
 use log::{info, warn};
+use packer::Packer;
 use serde_json::json;
 use std::net::SocketAddr;
 use warp::{path, Filter, Rejection};
@@ -66,7 +67,7 @@ fn routes() -> Resp!() {
 }
 
 fn statics() -> impl Clone + Filter<Extract = (&'static [u8],), Error = Rejection> {
-    #[derive(packer::Packer)]
+    #[derive(Packer)]
     #[folder = "src/static"]
     struct Assets;
 

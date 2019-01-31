@@ -935,7 +935,7 @@ dependencies = [
  "lettre 0.8.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "lettre_email 0.8.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "log 0.4.6 (registry+https://github.com/rust-lang/crates.io-index)",
- "packer 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "packer 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde 1.0.85 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_derive 1.0.85 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_json 1.0.37 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1021,16 +1021,16 @@ dependencies = [
 
 [[package]]
 name = "packer"
-version = "0.2.0"
+version = "0.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "lazy_static 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "packer_derive 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "packer_derive 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
 name = "packer_derive"
-version = "0.2.0"
+version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "proc-macro2 0.4.26 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -2244,8 +2244,8 @@ dependencies = [
 "checksum openssl 0.9.24 (registry+https://github.com/rust-lang/crates.io-index)" = "a3605c298474a3aa69de92d21139fb5e2a81688d308262359d85cdd0d12a7985"
 "checksum openssl-sys 0.9.40 (registry+https://github.com/rust-lang/crates.io-index)" = "1bb974e77de925ef426b6bc82fce15fd45bdcbeb5728bffcfc7cdeeb7ce1c2d6"
 "checksum owning_ref 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)" = "49a4b8ea2179e6a2e27411d3bca09ca6dd630821cf6894c6c7c8467a8ee7ef13"
-"checksum packer 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)" = "8109ae5d85c58ddc9a6c7348b1314af4deafaaab7e432ef88e69cf7427fc39bb"
-"checksum packer_derive 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)" = "3d3ae00f5ed32ff0432ea2102b4859fe69ee102bef821ead13e737b45cc7fbe0"
+"checksum packer 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)" = "5da517337a4c0c0863687020ab5daf6eb16cc947c70d080ae1208c1af6dc5a61"
+"checksum packer_derive 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)" = "86a58177af2b2354a990b6b3fd06bd26cc4e0bcc323397517febb03891f1c8d4"
 "checksum parking_lot 0.7.1 (registry+https://github.com/rust-lang/crates.io-index)" = "ab41b4aed082705d1056416ae4468b6ea99d52599ecf3169b00088d43113e337"
 "checksum parking_lot_core 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)" = "94c8c7923936b28d546dfd14d4472eaf34c99b14e1c973a32b3e6d4eb04298c9"
 "checksum percent-encoding 1.0.1 (registry+https://github.com/rust-lang/crates.io-index)" = "31010dd2e1ac33d5b46a5b413495239882813e0369f8ed8a5e266f173602f831"
