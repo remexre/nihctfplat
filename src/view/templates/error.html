@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Error{% endblock title %}
+
+{% block main_classes %}center vcenter{% endblock main_classes %}
+
+{% block nav_right %}{% endblock nav_right %}
+
+{% block content %}
+{% set num_causes = causes | length %}
+<div class="box vertical" style="height: {{ 7.5 + num_causes * 1.5 }}em">
+	<span class="bold">
+{% if error == 'new row for relation "teams" violates check constraint "name_fmt"' %}
+	A team name must be composed of only letters and digits.
+{% elif error == 'new row for relation "teams" violates check constraint "name_len"' %}
+	A team name must be at least 3 characters.
+{% elif error == 'new row for relation "users" violates check constraint "name_len"' %}
+	A username must be at least 3 characters.
+{% else %}
+	{{ error }}
+{% endif %}
+	</span>
+	<span>If you believe this is in error, email <a href="mailto:ctf@remexre.xyz">ctf@remexre.xyz</a>.</span>
+	<pre>{{ causes }}</pre>
+</div>
+{% endblock content %}

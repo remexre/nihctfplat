@@ -7,7 +7,8 @@
 {% block content %}
 <form class="box vertical" method="post" style="min-height: 7em; width: 20em;">
 	<span><span class="bold">Note:</span> Team names are permanent, and cannot be changed.</span>
-	<input name="name" placeholder="Team Name" type="text"></input>
+	<input {% if bad_name %}class="bad"{% endif %}
+		name="name" placeholder="Team Name" type="text"></input>
 	<input type="submit" value="Create Team"></input>
 </form>
 {% endblock content %}

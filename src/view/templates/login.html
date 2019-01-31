@@ -6,7 +6,8 @@
 
 {% block content %}
 <form class="box vertical" method="post" style="min-height: 5em;">
-	<input name="username" placeholder="Username" type="text"></input>
+	<input {% if bad_username %}class="bad"{% endif %}
+		name="username" placeholder="Username" type="text"></input>
 	<input type="submit" value="Log In"></input>
 </form>
 {% endblock content %}

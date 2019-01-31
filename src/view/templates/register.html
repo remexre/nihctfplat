@@ -6,8 +6,10 @@
 
 {% block content %}
 <form class="box vertical" method="post" style="min-height: 10em;">
-	<input autocomplete="off" name="username" placeholder="Username" type="text"></input>
-	<input name="email" placeholder="Email Address" type="email"></input>
+	<input {% if bad_username %}class="bad"{% endif %}
+		name="username" placeholder="Username" type="text"></input>
+	<input {% if bad_email %}class="bad"{% endif %}
+		name="email" placeholder="Email Address" type="email"></input>
 	<input type="submit" value="Register"></input>
 </form>
 {% endblock content %}

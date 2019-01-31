@@ -19,8 +19,9 @@
 		<nav>
 			<a class="bold nounderline" href="/">ACM CTF 2</a>
 			<a href="/sponsoring-ctf3">Sponsoring CTF 3</a>
-			<a href="mailto:remexre@protonmail.com">Contact a Mod</a>
+			<a href="mailto:ctf@remexre.xyz">Contact a Mod</a>
 			<span class="spacer"></span>
+{% block nav_right %}
 {% if me %}
 {% if me.team %}
 			<a href="/problems">Problems</a>
@@ -34,6 +35,7 @@
 			<a href="/login">Log In</a>
 			<a href="/register">Register</a>
 {% endif %}
+{% endblock nav_right %}
 		</nav>
 		<main class="{% block main_classes %}center{% endblock main_classes %}">
 			{% block content %}{% endblock content %}
