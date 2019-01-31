@@ -16,7 +16,7 @@ table! {
 
 table! {
     teams (id) {
-        id -> Int4,
+        id -> Uuid,
         name -> Varchar,
     }
 }
@@ -26,7 +26,7 @@ table! {
         id -> Int4,
         name -> Varchar,
         email -> Varchar,
-        teamid -> Nullable<Int4>,
+        teamid -> Nullable<Uuid>,
     }
 }
 

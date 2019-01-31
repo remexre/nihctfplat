@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}Team {{ team.name }}{% endblock title %}
+
+{% block main_classes %}center vcenter{% endblock main_classes %}
+
+
+{% block content %}
+{% set num_team_members = team_members | length %}
+<div class="box vertical" style="height: {{ 7.5 + num_team_members * 1.5 }}em">
+	<span><span class="bold">Team Name:</span> {{ team.name }}</span>
+	<span>
+		<span class="bold">Members:</span>
+		<ol>
+			{% for name in team_members %}<li>{{ name }}</li>{% endfor %}
+		</ol>
+	</span>
+	<span><span class="bold">Join Code:</span> {{ team.id }}</span>
+</div>
+{% endblock content %}

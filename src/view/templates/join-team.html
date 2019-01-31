@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block title %}Join a Team{% endblock title %}
+
+{% block main_classes %}center vcenter{% endblock main_classes %}
+
+{% block content %}
+<form class="box vertical" method="post" style="min-height: 7em; width: 20em;">
+	<span><span class="bold">Note:</span> Joining a team is permanent.</span>
+	<input name="join_code" placeholder="Join Code" type="text"></input>
+	<input type="submit" value="Join Team"></input>
+</form>
+{% endblock content %}

@@ -5,7 +5,6 @@
 //! > it's role is largely the same.
 
 use failure::{Error, Fallible, SyncFailure};
-use log::warn;
 use packer::Packer;
 use serde::Serialize;
 use tera::Tera;
@@ -46,8 +45,5 @@ pub fn render_html<T: Serialize>(name: &str, data: T) -> Result<Response<String>
                 .body(body)
                 .map_err(Error::from)
         })
-        .map_err(|err| {
-            warn!("{}", err);
-            custom(err.compat())
-        })
+        .map_err(|err| custom(err.compat()))
 }

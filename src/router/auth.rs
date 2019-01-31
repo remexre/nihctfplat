@@ -1,13 +1,16 @@
 use crate::{
     dal::{Mailer, DB},
     logic,
-    router::{simple_page, util::FutureExt},
-    schema::User,
+    router::{simple_page, team::TeamMembers, util::FutureExt},
+    schema::{Team, User},
     view::render_html,
 };
 use chrono::Duration;
 use failure::Error;
-use futures::{future::result, Future};
+use futures::{
+    future::{ok, result, Either},
+    Future,
+};
 use serde_derive::Deserialize;
 use serde_json::json;
 use uuid::Uuid;
@@ -16,9 +19,7 @@ use warp::{
         header::{LOCATION, SET_COOKIE},
         Response, StatusCode,
     },
-    path,
-    reject::custom,
-    Filter, Rejection,
+    path, Filter, Rejection,
 };
 
 /// A filter that parses a user's authentication cookie.
@@ -27,29 +28,55 @@ pub fn parse_auth_cookie() -> impl Clone + Filter<Extract = (), Error = Rejectio
         .and(warp::ext::get::<DB>())
         .and_then(move |token: String, db: DB| {
             logic::auth::authed_user(db.clone(), &token)
-                .map(warp::ext::set)
-                .map_err(|err| custom(err.compat()))
+                .and_then(move |user| {
+                    let team = user.team;
+                    warp::ext::set(user);
+                    if let Some(team) = team {
+                        Either::A(
+                            db.get_team(team)
+                                .map(warp::ext::set)
+                                .join(
+                                    db.get_team_members(team)
+                                        .map(TeamMembers)
+                                        .map(warp::ext::set),
+                                )
+                                .map(|((), ())| ()),
+                        )
+                    } else {
+                        Either::B(ok(()))
+                    }
+                })
+                .err_to_rejection()
         })
         .untuple_one()
         .or(warp::any())
         .unify()
 }
 
-/*
-/// A filter that authenticates the user via a cookie. The `parse_auth_cookie` filter must have
-/// already been run.
-pub fn auth() -> impl Clone + Filter<Extract = (User,), Error = Rejection> {
-    // TODO: Return a different error.
-    warp::ext::get::<User>()
-}
-*/
-
 /// A filter that optionally authenticates the user via a cookie. The `parse_auth_cookie` filter
 /// must have already been run.
-pub fn auth_opt() -> impl Clone + Filter<Extract = (Option<User>,), Error = Rejection> {
-    // TODO: Return a different error.
+pub fn opt_auth() -> impl Clone + Filter<Extract = (Option<User>,), Error = Rejection> {
     warp::ext::get::<User>()
         .map(Some)
+        .or(warp::any().map(|| None))
+        .unify()
+}
+
+/// A filter that retrieves the user's team from their authentication cookie. The
+/// `parse_auth_cookie` filter must have already been run.
+pub fn opt_team() -> impl Clone + Filter<Extract = (Option<Team>,), Error = Rejection> {
+    warp::ext::get::<Team>()
+        .map(Some)
+        .or(warp::any().map(|| None))
+        .unify()
+}
+
+/// A filter that retrieves the user's team's members from their authentication cookie. The
+/// `parse_auth_cookie` filter must have already been run.
+pub fn opt_team_members() -> impl Clone + Filter<Extract = (Option<Vec<String>>,), Error = Rejection>
+{
+    warp::ext::get::<TeamMembers>()
+        .map(|TeamMembers(tm)| Some(tm))
         .or(warp::any().map(|| None))
         .unify()
 }
@@ -75,7 +102,7 @@ pub fn login() -> Resp!() {
 pub fn login_from_mail_get() -> Resp!() {
     path!(Uuid)
         .and(warp::path::end())
-        .and(auth_opt())
+        .and(opt_auth())
         .and_then(move |login, me| {
             render_html("login-from-mail.html", json!({ "login": login, "me": me }))
         })

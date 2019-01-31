@@ -5,6 +5,7 @@
 //! > is to call into the domain logic, and then render that response data with an appropriate view.
 
 mod auth;
+mod team;
 mod util;
 
 use crate::{
@@ -62,6 +63,11 @@ fn routes() -> Resp!() {
             GET("register") => simple_page("register.html"),
             POST("register") => auth::register(),
             GET("sponsoring-ctf3") => simple_page("sponsoring-ctf3.html"),
+            GET("team") => simple_page("team.html"),
+            GET("team" / "create") => simple_page("create-team.html"),
+            POST("team" / "create") => team::create(),
+            GET("team" / "join") => simple_page("join-team.html"),
+            POST("team" / "join") => team::join(),
         })
         .boxed()
 }
@@ -78,7 +84,16 @@ fn statics() -> impl Clone + Filter<Extract = (&'static [u8],), Error = Rejectio
 
 fn simple_page(name: &'static str) -> Resp!() {
     warp::path::end()
-        .and(auth::auth_opt())
-        .and_then(move |me| render_html(name, json!({ "me": me })))
+        .and(auth::opt_auth())
+        .and(auth::opt_team())
+        .and(auth::opt_team_members())
+        .and_then(move |me, team, team_members| {
+            let data = json!({
+                "me": me,
+                "team": team,
+                "team_members": team_members
+            });
+            render_html(name, data)
+        })
         .boxed()
 }

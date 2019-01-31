@@ -10,8 +10,8 @@ mod schema;
 
 pub use crate::dal::mailer::Mailer;
 use crate::{
-    dal::schema::{auths, logins, users},
-    schema::User,
+    dal::schema::{auths, logins, teams, users},
+    schema::{Team, User},
     util::blocking,
 };
 use chrono::{DateTime, Utc};
@@ -20,7 +20,7 @@ use diesel::{
     prelude::*,
     r2d2::{ConnectionManager, Pool, PoolError},
 };
-use failure::Error;
+use failure::{bail, Error};
 use futures::{
     future::{err, Either},
     Future,
@@ -83,6 +83,30 @@ impl DB {
         })
     }
 
+    /// Creates a team, adding the user to it, with the given name, returning its ID.
+    pub fn create_team(&self, user: i32, name: String) -> impl Future<Item = Uuid, Error = Error> {
+        self.async_query(move |conn| {
+            conn.transaction(|| {
+                let has_team = users::table
+                    .find(user)
+                    .select(users::teamid.is_not_null())
+                    .get_result(conn)?;
+                if has_team {
+                    bail!("You already have a team!");
+                }
+
+                let id = Uuid::new_v4();
+                let _ = insert_into(teams::table)
+                    .values((teams::id.eq(id), teams::name.eq(&name)))
+                    .execute(conn)?;
+                let _ = update(users::table.find(user))
+                    .set(users::teamid.eq(id))
+                    .execute(conn)?;
+                Ok(id)
+            })
+        })
+    }
+
     /// Creates a user, returning their ID.
     pub fn create_user(
         &self,
@@ -107,6 +131,21 @@ impl DB {
         })
     }
 
+    /// Gets a team by ID.
+    pub fn get_team(&self, team: Uuid) -> impl Future<Item = Team, Error = Error> {
+        self.async_query(move |conn| teams::table.find(team).get_result(conn))
+    }
+
+    /// Gets a team's member's names.
+    pub fn get_team_members(&self, team: Uuid) -> impl Future<Item = Vec<String>, Error = Error> {
+        self.async_query(move |conn| {
+            users::table
+                .filter(users::teamid.eq(team))
+                .select(users::name)
+                .get_results(conn)
+        })
+    }
+
     /// Gets a user by ID.
     pub fn get_user(&self, user: i32) -> impl Future<Item = User, Error = Error> {
         self.async_query(move |conn| users::table.find(user).get_result(conn))
@@ -121,6 +160,34 @@ impl DB {
             users::table
                 .filter(users::name.eq(&username))
                 .get_result(conn)
+        })
+    }
+
+    /// Adds a user to a team.
+    pub fn join_team(&self, user: i32, team: Uuid) -> impl Future<Item = (), Error = Error> {
+        self.async_query(move |conn| {
+            conn.transaction(|| {
+                let has_team = users::table
+                    .find(user)
+                    .select(users::teamid.is_not_null())
+                    .get_result(conn)?;
+                if has_team {
+                    bail!("You already have a team!");
+                }
+
+                let members = users::table
+                    .filter(users::teamid.eq(team))
+                    .count()
+                    .get_result::<i64>(conn)?;
+                if members >= 4 {
+                    bail!("The team is full.");
+                }
+
+                let _ = update(users::table.find(user))
+                    .set(users::teamid.eq(team))
+                    .execute(conn)?;
+                Ok(())
+            })
         })
     }
 
