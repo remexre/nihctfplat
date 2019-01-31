@@ -1,0 +1,31 @@
+version: '3'
+services:
+  nihctfplat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+    - DATABASE_URL=postgresql://postgres:changeme@postgres/nihctfplat
+    - SMTP_HOST=smtp.gmail.com
+    - SMTP_USER=changeme@gmail.com
+    - SMTP_PASS=changeme
+    networks:
+    - internal
+    ports:
+    - '19000:8080'
+    restart: unless-stopped
+  postgres:
+    environment:
+    - POSTGRES_DB=nihctfplat
+    - POSTGRES_PASSWORD=changeme
+    - POSTGRES_USER=postgres
+    image: postgres
+    networks:
+    - internal
+    restart: always
+
+networks:
+  internal:
+    driver: bridge
+
+# vim: et:ts=2:sw=2
