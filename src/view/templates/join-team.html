@@ -6,6 +6,7 @@
 
 {% block content %}
 <form class="box vertical" method="post" style="min-height: 7em; width: 20em;">
+	{{ macros::flashes() }}
 	<span><span class="bold">Note:</span> Joining a team is permanent.</span>
 	<input {% if bad_join_code %}class="bad"{% endif %}
 		name="join_code" placeholder="Join Code" type="text"></input>

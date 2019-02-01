@@ -8,19 +8,8 @@
 
 {% block content %}
 {% set num_causes = causes | length %}
-<div class="box vertical" style="height: {{ 7.5 + num_causes * 1.5 }}em">
-	<span class="bold">
-{% if error == 'new row for relation "teams" violates check constraint "name_fmt"' %}
-	A team name must be composed of only letters and digits.
-{% elif error == 'new row for relation "teams" violates check constraint "name_len"' %}
-	A team name must be at least 3 characters.
-{% elif error == 'new row for relation "users" violates check constraint "name_len"' %}
-	A username must be at least 3 characters.
-{% else %}
-	{{ error }}
-{% endif %}
-	</span>
-	<span>If you believe this is in error, email <a href="mailto:ctf@remexre.xyz">ctf@remexre.xyz</a>.</span>
-	<pre>{{ causes }}</pre>
+<div class="box vertical" style="height: {{ 3 + num_causes * 1.5 }}em">
+	<span>Internal Server Error; please email <a href="mailto:ctf@remexre.xyz">ctf@remexre.xyz</a> with the following:</span>
+	{% for cause in causes %}<pre>{{ cause }}</pre>{% endfor %}
 </div>
 {% endblock content %}
