@@ -93,7 +93,7 @@ pub fn join() -> Resp!() {
             ))
         })
         .recover_with_template("join-team.html", |err: &Compat<Error>| {
-            let err = dbg!(err.to_string());
+            let err = err.to_string();
             match coerce!(&err => &str) {
                 "The team is full." => Some((
                     StatusCode::BAD_REQUEST,

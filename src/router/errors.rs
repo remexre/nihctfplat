@@ -1,6 +1,7 @@
 use crate::{router::util::FutureExt, view::render_html};
 use failure::Error as FailureError;
 use futures::{future::result, Future};
+use log::error;
 use serde_json::json;
 use std::error::Error;
 use warp::{
@@ -8,8 +9,9 @@ use warp::{
     Rejection,
 };
 
-/// A handler for unhandled internal errors.
+/// A handler for unhandled errors.
 pub fn internal(e: Rejection) -> impl Future<Item = Response<String>, Error = Rejection> {
+    error!("Unhandler error: {:?}", e);
     let data = json!({
         "causes": error_causes(&e).into_iter().map(|e| e.to_string()).collect::<Vec<_>>(),
         "error": e.cause().map(|e| e.to_string()),
