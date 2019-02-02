@@ -189,6 +189,11 @@ pub fn register() -> Resp!() {
                     vec!["bad_username"],
                     vec!["Your username must be at least 3 characters"],
                 )),
+                r#"duplicate key value violates unique constraint "users_name_key""# => Some((
+                    StatusCode::BAD_REQUEST,
+                    vec!["bad_username"],
+                    vec!["This username is already taken"],
+                )),
                 r#"new row for relation "users" violates check constraint "email_fmt""# => Some((
                     StatusCode::BAD_REQUEST,
                     vec!["bad_email"],
@@ -198,6 +203,11 @@ pub fn register() -> Resp!() {
                     StatusCode::BAD_REQUEST,
                     vec!["bad_email"],
                     vec!["That doesn't look like an email address..."],
+                )),
+                r#"duplicate key value violates unique constraint "users_email_key""# => Some((
+                    StatusCode::BAD_REQUEST,
+                    vec!["bad_email"],
+                    vec!["This email is already registered"],
                 )),
                 _ => None,
             }

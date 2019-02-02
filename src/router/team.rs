@@ -46,12 +46,17 @@ pub fn create() -> Resp!() {
                 r#"new row for relation "teams" violates check constraint "name_fmt""# => Some((
                     StatusCode::BAD_REQUEST,
                     vec!["bad_name"],
-                    vec!["Your group name must contain only ASCII letters and digits"],
+                    vec!["Your team name must contain only ASCII letters and digits"],
                 )),
                 r#"new row for relation "teams" violates check constraint "name_len""# => Some((
                     StatusCode::BAD_REQUEST,
                     vec!["bad_name"],
-                    vec!["Your group name must be at least 3 characters"],
+                    vec!["Your team name must be at least 3 characters"],
+                )),
+                r#"duplicate key value violates unique constraint "teams_name_key""# => Some((
+                    StatusCode::BAD_REQUEST,
+                    vec!["bad_name"],
+                    vec!["This team name is already taken"],
                 )),
                 _ => None,
             }
