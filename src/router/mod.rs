@@ -23,8 +23,13 @@ use futures::{
 use log::{info, warn};
 use packer::Packer;
 use serde_json::json;
-use std::net::SocketAddr;
-use warp::{path, Filter, Rejection};
+use std::{net::SocketAddr, path::Path};
+use warp::{
+    http::{header::CONTENT_TYPE, Response},
+    path,
+    reject::custom,
+    Filter, Rejection,
+};
 
 /// Starts an HTTP server at the given address. The polymorphism in the return type indicates that
 /// the future will never resolve, since it can be trivially used as
@@ -77,13 +82,33 @@ fn routes() -> Resp!() {
         .boxed()
 }
 
-fn statics() -> impl Clone + Filter<Extract = (&'static [u8],), Error = Rejection> {
+fn statics() -> impl Clone + Filter<Extract = (Response<&'static [u8]>,), Error = Rejection> {
     #[derive(Packer)]
     #[folder = "src/static"]
     struct Assets;
 
     warp::path::tail().and_then(|path: warp::path::Tail| {
-        Assets::get(path.as_str()).ok_or_else(warp::reject::not_found)
+        let path = path.as_str();
+        Assets::get(path)
+            .ok_or_else(warp::reject::not_found)
+            .and_then(|body| {
+                let ext = coerce!(path.as_ref() => &Path)
+                    .extension()
+                    .and_then(|s| s.to_str());
+                let ct = match ext {
+                    Some("css") => "text/css",
+                    Some("txt") => "text/plain; charset=utf-8",
+                    Some("woff2") => "font/woff2",
+                    _ => {
+                        warn!("Unknown extension for static file: {:?}", ext);
+                        "application/octet-stream"
+                    }
+                };
+                Response::builder()
+                    .header(CONTENT_TYPE, ct)
+                    .body(body)
+                    .map_err(custom)
+            })
     })
 }
 

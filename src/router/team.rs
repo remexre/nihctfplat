@@ -39,7 +39,7 @@ pub fn create() -> Resp!() {
                 })
                 .err_to_rejection()
         })
-        .recover_with_template("team.html", |err| match err.to_string() {
+        .recover_with_template("team.html", |err| match dbg!(err.to_string()) {
             _ => None,
         })
 }
