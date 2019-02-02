@@ -14,7 +14,10 @@ pub fn internal(e: Rejection) -> impl Future<Item = Response<String>, Error = Re
         "causes": error_causes(&e).into_iter().map(|e| e.to_string()).collect::<Vec<_>>(),
         "error": e.cause().map(|e| e.to_string()),
     });
-    result(render_html("error.html", data))
+    result(render_html("error.html", data)).map(|mut r| {
+        *r.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
+        r
+    })
 }
 
 /// A last-chance handler for unhandled errors that pass through the `internal` filter. (Probably

@@ -1,12 +1,16 @@
 use crate::{
     dal::{Mailer, DB},
     logic,
-    router::{simple_page, team::TeamMembers, util::FutureExt},
+    router::{
+        simple_page,
+        team::TeamMembers,
+        util::{FilterExt, FutureExt},
+    },
     schema::{Team, User},
     view::render_html,
 };
 use chrono::Duration;
-use failure::Error;
+use failure::{Compat, Error};
 use futures::{
     future::{ok, result, Either},
     Future,
@@ -96,6 +100,17 @@ pub fn login() -> Resp!() {
         })
         .untuple_one()
         .and(simple_page("login-ok.html"))
+        .recover_with_template("login.html", |err: &Compat<Error>| {
+            let err = err.to_string();
+            match coerce!(&err => &str) {
+                r#"NotFound"# => Some((
+                    StatusCode::NOT_FOUND,
+                    vec!["bad_username"],
+                    vec!["That user doesn't exist..."],
+                )),
+                _ => None,
+            }
+        })
         .boxed()
 }
 
@@ -161,5 +176,30 @@ pub fn register() -> Resp!() {
         })
         .untuple_one()
         .and(simple_page("login-ok.html"))
-        .boxed()
+        .recover_with_template("register.html", |err: &Compat<Error>| {
+            let err = err.to_string();
+            match coerce!(&err => &str) {
+                r#"new row for relation "users" violates check constraint "name_fmt""# => Some((
+                    StatusCode::BAD_REQUEST,
+                    vec!["bad_username"],
+                    vec!["Your username must contain only ASCII letters and digits"],
+                )),
+                r#"new row for relation "users" violates check constraint "name_len""# => Some((
+                    StatusCode::BAD_REQUEST,
+                    vec!["bad_username"],
+                    vec!["Your username must be at least 3 characters"],
+                )),
+                r#"new row for relation "users" violates check constraint "email_fmt""# => Some((
+                    StatusCode::BAD_REQUEST,
+                    vec!["bad_email"],
+                    vec!["That doesn't look like an email address..."],
+                )),
+                r#"new row for relation "users" violates check constraint "email_len""# => Some((
+                    StatusCode::BAD_REQUEST,
+                    vec!["bad_email"],
+                    vec!["That doesn't look like an email address..."],
+                )),
+                _ => None,
+            }
+        })
 }

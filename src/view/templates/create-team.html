@@ -5,7 +5,7 @@
 {% block main_classes %}center vcenter{% endblock main_classes %}
 
 {% block content %}
-<form class="box vertical" method="post" style="min-height: 7em; width: 20em;">
+<form class="box vertical" method="post" style="min-height: 10em; width: 20em;">
 	{{ macros::flashes() }}
 	<span><span class="bold">Note:</span> Team names are permanent, and cannot be changed.</span>
 	<input {% if bad_name %}class="bad"{% endif %}

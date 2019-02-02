@@ -1,10 +1,15 @@
 use crate::{router::auth, view::render_html};
 use either::Either;
-use failure::{Compat, Error};
+use failure::Error;
 use futures::{Async, Future};
+use maplit::hashmap;
 use serde_json::Value;
-use std::collections::HashMap;
-use warp::{filters::BoxedFilter, http::Response, Filter, Rejection, Reply};
+use std::error::Error as StdError;
+use warp::{
+    filters::BoxedFilter,
+    http::{Response, StatusCode},
+    Filter, Rejection, Reply,
+};
 
 /// The type of a responder. Since `impl Trait` can't be used in `type` items, this magics one up.
 macro_rules! Resp {
@@ -29,13 +34,18 @@ macro_rules! route_any {
 /// An extension trait for Filters.
 pub trait FilterExt<T>: Sized {
     /// An error-handling function. The argument function should return keys to set to true.
-    fn recover_with_template<F>(
+    fn recover_with_template<E, F>(
         self,
         template: &'static str,
         func: F,
     ) -> BoxedFilter<(Either<T, Response<String>>,)>
     where
-        F: 'static + Clone + Fn(&Error) -> Option<Vec<&'static str>> + Send + Sync;
+        E: 'static + StdError,
+        F: 'static
+            + Clone
+            + Fn(&E) -> Option<(StatusCode, Vec<&'static str>, Vec<&'static str>)>
+            + Send
+            + Sync;
 }
 
 impl<Fi, T> FilterExt<T> for Fi
@@ -43,13 +53,18 @@ where
     Fi: 'static + Filter<Extract = (T,), Error = Rejection> + Send + Sync,
     T: 'static + Reply + Send + Sync,
 {
-    fn recover_with_template<F>(
+    fn recover_with_template<E, F>(
         self,
         template: &'static str,
         func: F,
     ) -> BoxedFilter<(Either<T, Response<String>>,)>
     where
-        F: 'static + Clone + Fn(&Error) -> Option<Vec<&'static str>> + Send + Sync,
+        E: 'static + StdError,
+        F: 'static
+            + Clone
+            + Fn(&E) -> Option<(StatusCode, Vec<&'static str>, Vec<&'static str>)>
+            + Send
+            + Sync,
     {
         self.map(Ok)
             .recover(|e| Ok(Err(e)))
@@ -57,19 +72,24 @@ where
             .and(auth::opt_auth())
             .and_then(move |res: Result<T, Rejection>, me| match res {
                 Ok(r) => Ok(Either::Left(r)),
-                Err(r) => match r.find_cause::<Compat<Error>>() {
-                    Some(err) => match func(err.get_ref()) {
-                        Some(codes) => {
-                            let mut hm = HashMap::new();
-                            let _ = hm.insert("me", serde_json::to_value(me).unwrap());
+                Err(r) => match r.find_cause() {
+                    Some(err) => match func(err) {
+                        Some((status, codes, flashes)) => {
+                            let mut hm = hashmap! {
+                                "flashes" => serde_json::to_value(flashes).unwrap(),
+                                "me" => serde_json::to_value(me).unwrap(),
+                            };
                             for code in codes {
                                 let _ = hm.insert(code, Value::Bool(true));
                             }
-                            render_html(template, hm).map(Either::Right)
+                            render_html(template, hm).map(|mut r| {
+                                *r.status_mut() = status;
+                                Either::Right(r)
+                            })
                         }
                         None => Err(r),
                     },
-                    None => Err(r),
+                    None => Err(dbg!(r)),
                 },
             })
             .boxed()

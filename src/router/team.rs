@@ -4,11 +4,12 @@ use crate::{
     router::util::{FilterExt, FutureExt},
     schema::User,
 };
-use failure::Error;
+use failure::{Compat, Error};
 use futures::Future;
 use serde_derive::{Deserialize, Serialize};
 use uuid::Uuid;
 use warp::{
+    filters::body::BodyDeserializeError,
     http::{header::LOCATION, Response, StatusCode},
     Filter,
 };
@@ -39,8 +40,21 @@ pub fn create() -> Resp!() {
                 })
                 .err_to_rejection()
         })
-        .recover_with_template("team.html", |err| match dbg!(err.to_string()) {
-            _ => None,
+        .recover_with_template("create-team.html", |err: &Compat<Error>| {
+            let err = err.to_string();
+            match coerce!(&err => &str) {
+                r#"new row for relation "teams" violates check constraint "name_fmt""# => Some((
+                    StatusCode::BAD_REQUEST,
+                    vec!["bad_name"],
+                    vec!["Your group name must contain only ASCII letters and digits"],
+                )),
+                r#"new row for relation "teams" violates check constraint "name_len""# => Some((
+                    StatusCode::BAD_REQUEST,
+                    vec!["bad_name"],
+                    vec!["Your group name must be at least 3 characters"],
+                )),
+                _ => None,
+            }
         })
 }
 
@@ -66,5 +80,17 @@ pub fn join() -> Resp!() {
                 })
                 .err_to_rejection()
         })
-        .boxed()
+        .recover_with_template("join-team.html", |_: &BodyDeserializeError| {
+            Some((
+                StatusCode::BAD_REQUEST,
+                vec!["bad_join_code"],
+                vec!["Your join code was invalid."],
+            ))
+        })
+        .recover_with_template("join-team.html", |err: &Compat<Error>| {
+            let err = dbg!(err.to_string());
+            match coerce!(&err => &str) {
+                _ => None,
+            }
+        })
 }
