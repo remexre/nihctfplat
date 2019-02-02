@@ -1,4 +1,9 @@
-use crate::{dal::DB, logic, router::util::FutureExt, schema::User};
+use crate::{
+    dal::DB,
+    logic,
+    router::util::{FilterExt, FutureExt},
+    schema::User,
+};
 use failure::Error;
 use futures::Future;
 use serde_derive::{Deserialize, Serialize};
@@ -34,7 +39,9 @@ pub fn create() -> Resp!() {
                 })
                 .err_to_rejection()
         })
-        .boxed()
+        .recover_with_template("team.html", |err| match err.to_string() {
+            _ => None,
+        })
 }
 
 /// The route for joining a team.
