@@ -11,13 +11,18 @@ use warp::{
 
 /// A handler for unhandled errors.
 pub fn internal(e: Rejection) -> impl Future<Item = Response<String>, Error = Rejection> {
-    error!("Unhandler error: {:?}", e);
-    let data = json!({
-        "causes": error_causes(&e).into_iter().map(|e| e.to_string()).collect::<Vec<_>>(),
-        "error": e.cause().map(|e| e.to_string()),
-    });
-    result(render_html("error.html", data)).map(|mut r| {
-        *r.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
+    let (name, data, code) = if e.is_not_found() {
+        ("404.html", json!({}), StatusCode::NOT_FOUND)
+    } else {
+        error!("Unhandled error: {:?}", e);
+        let data = json!({
+            "causes": error_causes(&e).into_iter().map(|e| e.to_string()).collect::<Vec<_>>(),
+            "error": e.cause().map(|e| e.to_string()),
+        });
+        ("error.html", data, StatusCode::INTERNAL_SERVER_ERROR)
+    };
+    result(render_html(name, data)).map(move |mut r| {
+        *r.status_mut() = code;
         r
     })
 }

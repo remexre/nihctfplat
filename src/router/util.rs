@@ -27,7 +27,7 @@ macro_rules! route_any {
     (@internal @path POST ()) => {{ warp::post2() }};
     (@internal @path $m:ident $p:tt) => {{
         use warp::path;
-        route_any!(@internal @path $m ()).and(path! $p)
+        path! $p.and(route_any!(@internal @path $m ()))
     }};
 }
 
